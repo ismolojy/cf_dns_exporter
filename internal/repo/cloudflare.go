@@ -1,4 +1,4 @@
-package metrics
+package repo
 
 import (
 	"encoding/json"
@@ -29,7 +29,7 @@ type ZoneIdResponse struct {
 	Result []ZoneId `json:"result"`
 }
 
-func ListZoneIds(apiUrl, apiToken string) ([]string, error) {
+func GetZoneIds(apiUrl, apiToken string) ([]string, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/zones", apiUrl), nil)
 	if err != nil {
