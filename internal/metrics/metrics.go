@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"cf_dns_exporter_fork/internal/config"
 	"cf_dns_exporter_fork/internal/repo"
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
@@ -24,12 +25,14 @@ var (
 		},
 		[]string{"domain"},
 	)
+	env    = "prod"
+	logger = config.SetupLogger(env)
 )
 
 func Listen(address string) error {
 	mux := http.NewServeMux()
 	mux.Handle("/metrics", promhttp.Handler())
-	//logger.Info("Started")
+	logger.Info("Server started ", `to: `, address)
 	return http.ListenAndServe(address, mux)
 }
 
@@ -38,7 +41,6 @@ func GenerateMetrics(responseAll []repo.DnsRecordsResponse) {
 	CfDnsDomainCounter.Reset()
 	for _, dnsList := range responseAll {
 		if len(dnsList.Result) == 0 {
-
 			continue
 		}
 		for _, record := range dnsList.Result {

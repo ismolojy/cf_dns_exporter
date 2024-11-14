@@ -1,17 +1,20 @@
 package config
 
 import (
-	"fmt"
+	"flag"
 	"gopkg.in/yaml.v2"
 	"log/slog"
 	"os"
 )
 
-var config Config
+var (
+	config Config
+)
 
 type Config struct {
 	ApiUrl   string `yaml:"apiUrl"`
 	ApiToken string `yaml:"apiToken"`
+	Address  string `yaml:"httpAddress"`
 	Port     string `yaml:"httpPort"`
 	LogPath  string `yaml:"logPath"`
 	Env      string `yaml:"env"`
@@ -20,22 +23,22 @@ type Config struct {
 func ParseConfigFile(filename string) (Config, error) {
 	data, err := os.ReadFile(filename)
 	if err != nil {
+
 		return config, err
 	}
 	err = yaml.Unmarshal(data, &config)
+	logger := SetupLogger(config.Env)
+	logger.Debug("Configuration file parsed")
 	return config, err
 }
 
-func LoadConfig(configFile *string) (Config, error) {
-	Config, err := ParseConfigFile(*configFile)
+func LoadConfig() (Config, error) {
+	file := flag.String("c", "./config.yaml", "Config path")
+	flag.Parse()
+	Config, err := ParseConfigFile(*file)
 	if err != nil {
-		_, err := fmt.Fprintf(os.Stderr, "Error loading Config: %v\n", err)
-		if err != nil {
-			_, err := fmt.Fprintf(os.Stderr, "Error: %s", err)
-			if err != nil {
-				return Config, err
-			}
-		}
+		logger := SetupLogger(config.Env)
+		logger.Error("Configuration file not parsed")
 	}
 	return Config, err
 }
